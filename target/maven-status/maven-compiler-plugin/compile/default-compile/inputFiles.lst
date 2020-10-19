@@ -1,0 +1,16 @@
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/dao/impl/WorldBankAPIDAOImpl.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPIElements.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/service/InvestingService.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/ServletInitializer.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPIResponse.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/IndicatorEntity.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/util/UrlsConstants.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPIIndicator.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/dao/WorldBankAPIDAO.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/EconomicDataAnalyzerApplication.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPIElement.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPIHeader.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/WBAPICountry.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/controller/InvestingController.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/entity/CountryEntity.java
+/home/alejo/projects/economic-data-analyzer/src/main/java/com/alejo/economicdataanalyzer/service/impl/InvestingServiceImpl.java
