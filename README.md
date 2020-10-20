@@ -39,7 +39,7 @@ Your program should:
 5. Add with a new branch in your current code every POC that you used for step 4. If you don’t implement new features add TODO comments.
 
 
-##Completed Challenge
+## Completed Challenge
 A completed challenge ready to submit for review will include:
 1. Source code, DDL, notes, etc. All in a git repository. It would be fine to have every commit on your work to check the progress.   
 2. It should be clear how to package and deploy your work (You can add a shell script or instructions to do that)

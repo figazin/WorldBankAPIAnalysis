@@ -1,11 +1,9 @@
 package com.alejo.economicdataanalyzer.service;
 
-import java.util.List;
-
-import com.alejo.economicdataanalyzer.entity.WBAPIResponse;
+import com.alejo.economicdataanalyzer.service.impl.IngestException;
 
 public interface InvestingService {
 
-	void ingestData();
+	void ingestData() throws IngestException;
 
 }

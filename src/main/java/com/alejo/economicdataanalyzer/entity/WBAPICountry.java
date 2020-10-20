@@ -56,5 +56,15 @@ public class WBAPICountry {
 	public String toString() {
 		return "WBAPICountry [id=" + id + ", value=" + value + "]";
 	}
+
+	public WBAPICountry(String id, String value) {
+		super();
+		this.id = id;
+		this.value = value;
+	}
+
+	public WBAPICountry() {
+		super();
+	}
 	
 }

@@ -103,4 +103,22 @@ public class WBAPIElement implements Serializable {
 		this.scale = scale;
 	}
 
+	public WBAPIElement() {
+		super();
+	}
+
+	public WBAPIElement(WBAPIIndicator indicator, WBAPICountry country, String countryiso3code, String date,
+			double value, String unit, String obs_status, long decimal, String scale) {
+		super();
+		this.indicator = indicator;
+		this.country = country;
+		this.countryiso3code = countryiso3code;
+		this.date = date;
+		this.value = value;
+		this.unit = unit;
+		this.obs_status = obs_status;
+		this.decimal = decimal;
+		this.scale = scale;
+	}
+
 }

@@ -27,4 +27,14 @@ public class WBAPIIndicator implements Serializable {
 		this.value = value;
 	}
 
+	public WBAPIIndicator(String id, String value) {
+		super();
+		this.id = id;
+		this.value = value;
+	}
+	
+	public WBAPIIndicator() {
+		super();
+	}
+
 }

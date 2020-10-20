@@ -1,11 +1,13 @@
 package com.alejo.economicdataanalyzer.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ import com.alejo.economicdataanalyzer.service.InvestingService;
 @Service
 public class InvestingServiceImpl implements InvestingService {
 	
+    Logger logger = LoggerFactory.getLogger(InvestingServiceImpl.class);
+    
 	@Autowired
 	WorldBankAPIDAO worldBankAPIDAO;
 	
@@ -26,10 +30,14 @@ public class InvestingServiceImpl implements InvestingService {
 	CountriesRepository countriesRepository;
 	
 	@Override
-	public void ingestData() {
+	public void ingestData() throws IngestException {
 		
 		//Get a list of All the countries with indicators for Total Population and GDP/PPP
 		List<WBAPIElement> populationResponse = worldBankAPIDAO.getCountriesPopulationAndGdpPpp();
+		if(CollectionUtils.isEmpty(populationResponse)) {
+			logger.error("World Bank API communication error");
+			throw new IngestException();
+		}
 		
 		//Group the list by Country (loop 1)
 		Map<Country, List<WBAPIElement>> populationMap = populationResponse.stream().collect(Collectors.groupingBy(e -> getCountryEntity(e)));
@@ -37,8 +45,6 @@ public class InvestingServiceImpl implements InvestingService {
 		//Build a list for saving to the DB only what's needed (loop 2)
 		List<Country> countryList = new ArrayList<Country>();
 		populationMap.forEach((k, v) -> countryList.add(assignCountryIndicators(k, v)));
-		
-		System.out.println(Arrays.toString(countryList.toArray()));
 		
 		countriesRepository.saveAll(countryList);
 		
