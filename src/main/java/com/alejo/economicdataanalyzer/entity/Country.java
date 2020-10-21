@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 @Entity
 public class Country implements Serializable {
@@ -21,6 +22,12 @@ public class Country implements Serializable {
 	private String name;
 	@OneToMany(mappedBy = "country", orphanRemoval = true, cascade = CascadeType.ALL)
 	private List<Indicator> indicators = new ArrayList<>();
+	@Transient
+	private Double populationGrowth;
+	@Transient
+	private Double totalPopulationGrowth;
+	@Transient
+	private Double gdpPppGrowth;
 
 	public Integer getId() {
 		return id;
@@ -97,4 +104,57 @@ public class Country implements Serializable {
 		return true;
 	}
 
+	/**
+	 * @return the populationGrowth
+	 */
+	public Double getPopulationGrowth() {
+		return populationGrowth;
+	}
+
+	/**
+	 * @param populationGrowth the populationGrowth to set
+	 */
+	public void setPopulationGrowth(Double populationGrowth) {
+		this.populationGrowth = populationGrowth;
+	}
+
+	/**
+	 * @return the totalPopulationGrowth
+	 */
+	public Double getTotalPopulationGrowth() {
+		return totalPopulationGrowth;
+	}
+
+	/**
+	 * @param totalPopulationGrowth the totalPopulationGrowth to set
+	 */
+	public void setTotalPopulationGrowth(Double totalPopulationGrowth) {
+		this.totalPopulationGrowth = totalPopulationGrowth;
+	}
+
+	/**
+	 * @return the gdpPppGrowth
+	 */
+	public Double getGdpPppGrowth() {
+		return gdpPppGrowth;
+	}
+
+	/**
+	 * @param gdpPppGrowth the gdpPppGrowth to set
+	 */
+	public void setGdpPppGrowth(Double gdpPppGrowth) {
+		this.gdpPppGrowth = gdpPppGrowth;
+	}
+
+	public Country(String code, String name, List<Indicator> indicators) {
+		super();
+		this.code = code;
+		this.name = name;
+		this.indicators = indicators;
+	}
+	
+	public Country() {
+		super();
+	}
+	
 }

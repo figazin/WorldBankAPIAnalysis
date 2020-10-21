@@ -1,6 +1,7 @@
 package com.alejo.economicdataanalyzer.service.impl;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -14,7 +15,9 @@ import org.springframework.stereotype.Service;
 import com.alejo.economicdataanalyzer.dao.WorldBankAPIDAO;
 import com.alejo.economicdataanalyzer.dao.impl.CountriesRepository;
 import com.alejo.economicdataanalyzer.entity.Country;
+import com.alejo.economicdataanalyzer.entity.CountryIndicatorResponse;
 import com.alejo.economicdataanalyzer.entity.Indicator;
+import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
 import com.alejo.economicdataanalyzer.entity.WBAPIElement;
 import com.alejo.economicdataanalyzer.service.InvestingService;
 
@@ -22,6 +25,9 @@ import com.alejo.economicdataanalyzer.service.InvestingService;
 public class InvestingServiceImpl implements InvestingService {
 	
     Logger logger = LoggerFactory.getLogger(InvestingServiceImpl.class);
+    
+    static Integer counter = 0;
+	static Double populationGrowth = 0.0;
     
 	@Autowired
 	WorldBankAPIDAO worldBankAPIDAO;
@@ -70,7 +76,8 @@ public class InvestingServiceImpl implements InvestingService {
 		// (loop 4)
 		List<Indicator> indicatorsList = new ArrayList<Indicator>();
 		indicatorsMapByYear.forEach((k, v) -> indicatorsList.add(createIndicator(v)));
-		 
+		
+		indicatorsList.sort(Comparator.comparing(Indicator::getYear));
 		return indicatorsList;
 	}
 
@@ -87,5 +94,97 @@ public class InvestingServiceImpl implements InvestingService {
 		}
 		return indicator;
 	}
+
+	@Override
+	public InvestingCountriesResponse listCountriesToInvest() {
+		
+		InvestingCountriesResponse response = new InvestingCountriesResponse();
+		List<Country> countries = countriesRepository.findAllCountries();
+		
+		calculatePopGrowth(countries);
+		countries.sort(Comparator.comparing(Country::getPopulationGrowth).reversed());
+		response.setTopPopulationGrowth(createTopPopResponse(countries));
+		
+		List<Country> higherPopGrowthCountries = countries.subList(0, 19);
+		calculateGdpPpp(higherPopGrowthCountries);
+		higherPopGrowthCountries.sort(Comparator.comparing(Country::getGdpPppGrowth).reversed());
+		response.setTopGDPPPP(createTopGdpPppResponse(higherPopGrowthCountries));
+		
+		return response;
+	}
+
+	private List<CountryIndicatorResponse> createTopGdpPppResponse(List<Country> countries) {
+		return countries.stream().limit(20).map(e -> createGdpIndicatorResponse(e)).collect(Collectors.toList());
+	}
+
+	private CountryIndicatorResponse createGdpIndicatorResponse(Country country) {
+		CountryIndicatorResponse countryIndicatorResponse = new CountryIndicatorResponse();
+		countryIndicatorResponse.setCountry(country.getName());
+		countryIndicatorResponse.setIndicator(country.getGdpPppGrowth().toString());
+		return countryIndicatorResponse;
+	}
+
+	private List<CountryIndicatorResponse> createTopPopResponse(List<Country> countries) {
+		return countries.stream().limit(20).map(e -> createPopIndicatorResponse(e)).collect(Collectors.toList());
+	}
 	
+	private CountryIndicatorResponse createPopIndicatorResponse(Country country) {
+		CountryIndicatorResponse countryIndicatorResponse = new CountryIndicatorResponse();
+		countryIndicatorResponse.setCountry(country.getName());
+		countryIndicatorResponse.setIndicator(country.getPopulationGrowth().toString());
+		return countryIndicatorResponse;
+	}
+
+	private void calculateGdpPpp(List<Country> countries) {
+		for (Country country : countries) {
+			country.setGdpPppGrowth(findGdpPPPGrowth(country.getIndicators()));
+		}
+	}
+
+	private Double findGdpPPPGrowth(List<Indicator> indicators) {
+		Double gdpPpp = 0.0;
+		for (int i = 0; i < indicators.size()-1; i++) {
+			gdpPpp = gdpPpp + indicators.get(i).getGdpPpp();
+		}
+		gdpPpp = gdpPpp / (indicators.size()-1);
+		return gdpPpp;
+	}
+
+	private void calculatePopGrowth(List<Country> countries) {
+		for (Country country : countries) {
+			country.setPopulationGrowth(findMaxPopGrowthRecursive(country.getIndicators()));
+		}
+	}
+	
+	//Calculation with recursivity
+	private Double findMaxPopGrowthRecursive(List<Indicator> indicators) {
+		if(counter == 0) {
+			populationGrowth = 0.0;
+		}
+		if(counter < indicators.size()-2) {
+			Double populationAux = indicators.get(counter+1).getPopulation() - indicators.get(counter).getPopulation();
+			if(populationAux > populationGrowth) {
+				populationGrowth = populationAux;
+			}
+			counter++;
+			findMaxPopGrowthRecursive(indicators);
+		}
+		counter = 0;
+		return populationGrowth;
+	}
+	
+	//Calculation with loop
+	@SuppressWarnings("unused")
+	private Double findMaxPopGrowth(List<Indicator> indicators) {
+		Double populationGrowth = 0.0;
+		Double populationAux = 0.0;
+		for (int i = 0; i < 2019-2012; i++) {
+			populationAux = indicators.get(i+1).getPopulation() - indicators.get(i).getPopulation();
+			if(populationGrowth < populationAux) {
+				populationGrowth = populationAux;
+			}
+		}
+		return populationGrowth;
+	}
+
 }

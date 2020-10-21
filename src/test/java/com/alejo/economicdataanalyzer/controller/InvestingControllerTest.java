@@ -35,6 +35,11 @@ public class InvestingControllerTest {
 	}
 	
 	@Test
+	public void countriesToInvestShouldReturnOKResponse() throws Exception {
+		this.mockMvc.perform(get(UrlsConstants.COUNTRIES_TO_INVEST)).andDo(print()).andExpect(status().isOk());
+	}
+	
+	@Test
 	public void ingestThrowsExceptionShouldReturnConflictResponse() throws Exception {
 		doThrow(IngestException.class).when(investingService).ingestData();
 		this.mockMvc.perform(get(UrlsConstants.INGEST_URL)).andDo(print()).andExpect(status().isConflict())

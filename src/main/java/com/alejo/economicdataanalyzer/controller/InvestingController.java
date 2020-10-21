@@ -6,18 +6,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
 import com.alejo.economicdataanalyzer.service.InvestingService;
 import com.alejo.economicdataanalyzer.service.impl.IngestException;
 import com.alejo.economicdataanalyzer.util.UrlsConstants;
 
 @RestController
 public class InvestingController {
-	
+
 	@Autowired
 	InvestingService investingService;
-	
+
 	@GetMapping(UrlsConstants.INGEST_URL)
-	public ResponseEntity<Object> ingestData(){
+	public ResponseEntity<Object> ingestData() {
 		try {
 			investingService.ingestData();
 		} catch (IngestException e) {
@@ -25,5 +26,11 @@ public class InvestingController {
 		}
 		return new ResponseEntity<Object>("Data ingestion finished correctly", HttpStatus.OK);
 	}
-	
+
+	@GetMapping(UrlsConstants.COUNTRIES_TO_INVEST)
+	public ResponseEntity<Object> listCountriesToInvest() {
+		InvestingCountriesResponse responseList = investingService.listCountriesToInvest();
+		return new ResponseEntity<Object>(responseList, HttpStatus.OK);
+	}
+
 }

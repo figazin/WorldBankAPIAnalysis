@@ -112,4 +112,16 @@ public class Indicator implements Serializable {
 		return true;
 	}
 
+	public Indicator(Country country, Integer year, Double population, Double gdpPpp) {
+		super();
+		this.country = country;
+		this.year = year;
+		this.population = population;
+		this.gdpPpp = gdpPpp;
+	}
+	
+	public Indicator() {
+		super();
+	}
+
 }
