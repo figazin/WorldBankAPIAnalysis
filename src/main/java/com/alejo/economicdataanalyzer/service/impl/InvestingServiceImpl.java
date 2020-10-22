@@ -40,6 +40,8 @@ public class InvestingServiceImpl implements InvestingService {
 	@Override
 	public void ingestData(Integer yearFrom, Integer yearTo) throws IngestException {
 		
+		//Truncate tables before ingesting
+
 		if(validateIngestInput(yearFrom, yearTo)) {
 			logger.error("Parameter Exception");
 			throw new IngestException("yearFrom and yearTo have to be between 2012 and 2019");
@@ -107,6 +109,9 @@ public class InvestingServiceImpl implements InvestingService {
 
 	@Override
 	public InvestingCountriesResponse listCountriesToInvest(Integer popuLimit, Integer gdpLimit) throws InvestServiceException {
+		
+		//Call ingest here in case this is called first
+		//Make ingest Cacheable and evict in case new yearTo or yearFrom are outside of range
 		
 		if(validateInvestInput(popuLimit, gdpLimit)) {
 			logger.error("Invalid Parameters");
