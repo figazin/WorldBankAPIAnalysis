@@ -19,6 +19,7 @@ import com.alejo.economicdataanalyzer.entity.CountryIndicatorResponse;
 import com.alejo.economicdataanalyzer.entity.Indicator;
 import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
 import com.alejo.economicdataanalyzer.entity.WBAPIElement;
+import com.alejo.economicdataanalyzer.exceptions.IngestException;
 import com.alejo.economicdataanalyzer.service.InvestingService;
 
 @Service
@@ -36,10 +37,14 @@ public class InvestingServiceImpl implements InvestingService {
 	CountriesRepository countriesRepository;
 	
 	@Override
-	public void ingestData() throws IngestException {
+	public void ingestData(Integer yearFrom, Integer yearTo) throws IngestException {
 		
+		if(validateInput(yearFrom, yearTo)) {
+			logger.error("World Bank API communication error");
+			throw new IngestException();
+		}
 		//Get a list of All the countries with indicators for Total Population and GDP/PPP
-		List<WBAPIElement> populationResponse = worldBankAPIDAO.getCountriesPopulationAndGdpPpp();
+		List<WBAPIElement> populationResponse = worldBankAPIDAO.getCountriesPopulationAndGdpPpp(yearFrom, yearTo);
 		if(CollectionUtils.isEmpty(populationResponse)) {
 			logger.error("World Bank API communication error");
 			throw new IngestException();
@@ -56,9 +61,13 @@ public class InvestingServiceImpl implements InvestingService {
 		
 	}
 
-	private Country assignCountryIndicators(Country k, List<WBAPIElement> v) {
-		k.setIndicators(buildIndicatorsList(v));
-		return k;
+	private boolean validateInput(Integer yearFrom, Integer yearTo) {
+		return (yearFrom < 2012 || yearFrom >2019) || (yearTo < 2012 || yearTo > 2019) || (yearFrom > yearTo);
+	}
+
+	private Country assignCountryIndicators(Country country, List<WBAPIElement> elementList) {
+		country.setIndicators(buildIndicatorsList(elementList));
+		return country;
 	}
 
 	private Country getCountryEntity(WBAPIElement e) {
@@ -96,25 +105,25 @@ public class InvestingServiceImpl implements InvestingService {
 	}
 
 	@Override
-	public InvestingCountriesResponse listCountriesToInvest() {
+	public InvestingCountriesResponse listCountriesToInvest(Integer popuLimit, Integer gdpLimit) {
 		
 		InvestingCountriesResponse response = new InvestingCountriesResponse();
 		List<Country> countries = countriesRepository.findAllCountries();
 		
 		calculatePopGrowth(countries);
 		countries.sort(Comparator.comparing(Country::getPopulationGrowth).reversed());
-		response.setTopPopulationGrowth(createTopPopResponse(countries));
+		response.setTopPopulationGrowth(createTopPopResponse(countries, popuLimit));
 		
-		List<Country> higherPopGrowthCountries = countries.subList(0, 19);
+		List<Country> higherPopGrowthCountries = countries.subList(0, popuLimit-1);
 		calculateGdpPpp(higherPopGrowthCountries);
 		higherPopGrowthCountries.sort(Comparator.comparing(Country::getGdpPppGrowth).reversed());
-		response.setTopGDPPPP(createTopGdpPppResponse(higherPopGrowthCountries));
+		response.setTopGDPPPP(createTopGdpPppResponse(higherPopGrowthCountries, gdpLimit));
 		
 		return response;
 	}
 
-	private List<CountryIndicatorResponse> createTopGdpPppResponse(List<Country> countries) {
-		return countries.stream().limit(20).map(e -> createGdpIndicatorResponse(e)).collect(Collectors.toList());
+	private List<CountryIndicatorResponse> createTopGdpPppResponse(List<Country> countries, Integer gdpCountriesLimit) {
+		return countries.stream().limit(gdpCountriesLimit).map(e -> createGdpIndicatorResponse(e)).collect(Collectors.toList());
 	}
 
 	private CountryIndicatorResponse createGdpIndicatorResponse(Country country) {
@@ -124,8 +133,8 @@ public class InvestingServiceImpl implements InvestingService {
 		return countryIndicatorResponse;
 	}
 
-	private List<CountryIndicatorResponse> createTopPopResponse(List<Country> countries) {
-		return countries.stream().limit(20).map(e -> createPopIndicatorResponse(e)).collect(Collectors.toList());
+	private List<CountryIndicatorResponse> createTopPopResponse(List<Country> countries, Integer populationCountriesLimit) {
+		return countries.stream().limit(populationCountriesLimit).map(e -> createPopIndicatorResponse(e)).collect(Collectors.toList());
 	}
 	
 	private CountryIndicatorResponse createPopIndicatorResponse(Country country) {
@@ -178,7 +187,7 @@ public class InvestingServiceImpl implements InvestingService {
 	private Double findMaxPopGrowth(List<Indicator> indicators) {
 		Double populationGrowth = 0.0;
 		Double populationAux = 0.0;
-		for (int i = 0; i < 2019-2012; i++) {
+		for (int i = 0; i < indicators.size()-1; i++) {
 			populationAux = indicators.get(i+1).getPopulation() - indicators.get(i).getPopulation();
 			if(populationGrowth < populationAux) {
 				populationGrowth = populationAux;

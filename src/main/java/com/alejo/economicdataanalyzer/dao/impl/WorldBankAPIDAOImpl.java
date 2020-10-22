@@ -39,9 +39,9 @@ public class WorldBankAPIDAOImpl implements WorldBankAPIDAO {
 	}
 	
 	@Override
-	public List<WBAPIElement> getCountriesPopulationAndGdpPpp() {
+	public List<WBAPIElement> getCountriesPopulationAndGdpPpp(Integer yearFrom, Integer yearTo) {
 		
-		Object[] apiResp = restTemplate.getForObject(UrlsConstants.POPULATION_PPP_URL, Object[].class);
+		Object[] apiResp = restTemplate.getForObject(String.format(UrlsConstants.POPULATION_PPP_URL, yearFrom, yearTo), Object[].class);
 		List<WBAPIElement> mappedResponse = mapper.convertValue(apiResp[1], new TypeReference<List<WBAPIElement>>() {});
 
 		return mappedResponse;

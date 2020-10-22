@@ -1,12 +1,12 @@
 package com.alejo.economicdataanalyzer.service;
 
 import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
-import com.alejo.economicdataanalyzer.service.impl.IngestException;
+import com.alejo.economicdataanalyzer.exceptions.IngestException;
 
 public interface InvestingService {
 
-	void ingestData() throws IngestException;
+	void ingestData(Integer yearFrom, Integer yearTo) throws IngestException;
 
-	InvestingCountriesResponse listCountriesToInvest();
+	InvestingCountriesResponse listCountriesToInvest(Integer populationCountriesLimit, Integer gdpCountriesLimit);
 
 }

@@ -2,6 +2,8 @@ package com.alejo.economicdataanalyzer.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,6 +26,7 @@ import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
 import com.alejo.economicdataanalyzer.entity.WBAPICountry;
 import com.alejo.economicdataanalyzer.entity.WBAPIElement;
 import com.alejo.economicdataanalyzer.entity.WBAPIIndicator;
+import com.alejo.economicdataanalyzer.exceptions.IngestException;
 
 @ExtendWith(MockitoExtension.class)
 public class InvestingServiceTest {
@@ -38,17 +41,25 @@ public class InvestingServiceTest {
     private InvestingServiceImpl investingService;
     
     @Test
+    public void whenAPICallWrongParamsThrowException() throws IngestException {
+    	assertThrows(IngestException.class, () -> investingService.ingestData(2011, 2019));
+    	assertThrows(IngestException.class, () -> investingService.ingestData(2013, 2021));
+    	assertThrows(IngestException.class, () -> investingService.ingestData(2011, 2020));
+    	assertThrows(IngestException.class, () -> investingService.ingestData(2013, 2011));
+    }
+    
+    @Test
     public void whenAPICallReturnsNullThenThrowException() throws IngestException {
-    	when(worldBankAPIDAO.getCountriesPopulationAndGdpPpp()).thenReturn(new ArrayList<WBAPIElement>());
-    	Assertions.assertThrows(IngestException.class, () -> investingService.ingestData());
+    	when(worldBankAPIDAO.getCountriesPopulationAndGdpPpp(anyInt(), anyInt())).thenReturn(new ArrayList<WBAPIElement>());
+    	Assertions.assertThrows(IngestException.class, () -> investingService.ingestData(2012, 2019));
     }
     
     @Test
     public void whenAPICallOkThenCallRepositoryWithRightSizeList() throws IngestException {
     	List<WBAPIElement> wbAPIList = getWBApiList();
-		when(worldBankAPIDAO.getCountriesPopulationAndGdpPpp()).thenReturn(wbAPIList);
+		when(worldBankAPIDAO.getCountriesPopulationAndGdpPpp(anyInt(), anyInt())).thenReturn(wbAPIList);
 		
-		investingService.ingestData();
+		investingService.ingestData(2012, 2019);
 		
 		ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 		verify(countriesRepository).saveAll(captor.capture());
@@ -57,16 +68,18 @@ public class InvestingServiceTest {
     }
     
     @Test
-    public void whenListCountriesThenReturnResponseEntity() {
+    public void whenListCountriesThenReturnResponseEntity() throws IngestException {
     	
     	List<Country> repoList = getRepositoryList();
 		when(countriesRepository.findAllCountries()).thenReturn(repoList);
 		
-		InvestingCountriesResponse response = investingService.listCountriesToInvest();
+		InvestingCountriesResponse response = investingService.listCountriesToInvest(2, 1);
 		
 		assertNotNull(response);
 		assertNotNull(response.getTopGDPPPP());
 		assertNotNull(response.getTopPopulationGrowth());
+		assertEquals(2, response.getTopPopulationGrowth().size());
+		assertEquals(1, response.getTopGDPPPP().size());
 		assertEquals("Brazil", response.getTopPopulationGrowth().get(0).getCountry());
 		//Brazil's biggest growth is 7 between 2015 and 2016
 		assertEquals("7.0", response.getTopPopulationGrowth().get(0).getIndicator());
@@ -96,10 +109,6 @@ public class InvestingServiceTest {
 		indicatorsList2.add(new Indicator(null, 2018, 603.0, 1.0));
 		indicatorsList2.add(new Indicator(null, 2019, 602.0, 2.0));
 		countryList.add(new Country("BRA", "Brazil", indicatorsList2));
-		countryList.addAll(countryList);
-		countryList.addAll(countryList);
-		countryList.addAll(countryList);
-		countryList.addAll(countryList);
 		return countryList;
 	}
 

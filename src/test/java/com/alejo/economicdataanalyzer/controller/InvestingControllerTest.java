@@ -1,6 +1,8 @@
 package com.alejo.economicdataanalyzer.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -14,8 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.alejo.economicdataanalyzer.exceptions.IngestException;
 import com.alejo.economicdataanalyzer.service.InvestingService;
-import com.alejo.economicdataanalyzer.service.impl.IngestException;
 import com.alejo.economicdataanalyzer.util.UrlsConstants;
 
 @SpringBootTest
@@ -41,7 +43,7 @@ public class InvestingControllerTest {
 	
 	@Test
 	public void ingestThrowsExceptionShouldReturnConflictResponse() throws Exception {
-		doThrow(IngestException.class).when(investingService).ingestData();
+		doThrow(IngestException.class).when(investingService).ingestData(any(), any());
 		this.mockMvc.perform(get(UrlsConstants.INGEST_URL)).andDo(print()).andExpect(status().isConflict())
 				.andExpect(content().string(containsString("Error during data ingestion")));
 	}

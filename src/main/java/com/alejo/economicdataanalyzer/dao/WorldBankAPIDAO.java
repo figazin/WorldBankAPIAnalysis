@@ -10,6 +10,6 @@ public interface WorldBankAPIDAO {
 
 	List<WBAPIElement> getCountriesGdpPpp();
 
-	List<WBAPIElement> getCountriesPopulationAndGdpPpp();
+	List<WBAPIElement> getCountriesPopulationAndGdpPpp(Integer yearFrom, Integer yearTo);
 
 }

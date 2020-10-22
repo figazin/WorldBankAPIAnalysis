@@ -1,4 +1,4 @@
-package com.alejo.economicdataanalyzer.service.impl;
+package com.alejo.economicdataanalyzer.exceptions;
 
 public class IngestException extends Exception {
 
