@@ -1,5 +1,16 @@
 # WorldBankAPIAnalysis
 
+## Starting the Application:
+To start the application:
+1. Run "mvn clean install"
+2. Run "mvn spring-boot:run"
+
+- Endpoints are:
+   - localhost:8080/ingest?yearFrom=?&yearTo=?
+   - localhost:8080/countriesToInvest?popuLimit=?&gdpLimit=?
+   
+Query params are optional and default values are those requested by the Challenge.
+
 ## Challenge Overview:
 We need a program which pull/download WorldBank world population and GDP data into a local database and then query that database to answer two question which are important to our global marketing team:
 

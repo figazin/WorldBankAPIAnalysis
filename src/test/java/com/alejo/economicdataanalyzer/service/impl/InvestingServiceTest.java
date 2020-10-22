@@ -27,6 +27,7 @@ import com.alejo.economicdataanalyzer.entity.WBAPICountry;
 import com.alejo.economicdataanalyzer.entity.WBAPIElement;
 import com.alejo.economicdataanalyzer.entity.WBAPIIndicator;
 import com.alejo.economicdataanalyzer.exceptions.IngestException;
+import com.alejo.economicdataanalyzer.exceptions.InvestServiceException;
 
 @ExtendWith(MockitoExtension.class)
 public class InvestingServiceTest {
@@ -68,7 +69,7 @@ public class InvestingServiceTest {
     }
     
     @Test
-    public void whenListCountriesThenReturnResponseEntity() throws IngestException {
+    public void whenListCountriesThenReturnResponseEntity() throws IngestException, InvestServiceException {
     	
     	List<Country> repoList = getRepositoryList();
 		when(countriesRepository.findAllCountries()).thenReturn(repoList);

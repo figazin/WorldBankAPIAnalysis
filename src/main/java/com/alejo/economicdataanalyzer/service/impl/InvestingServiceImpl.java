@@ -20,6 +20,7 @@ import com.alejo.economicdataanalyzer.entity.Indicator;
 import com.alejo.economicdataanalyzer.entity.InvestingCountriesResponse;
 import com.alejo.economicdataanalyzer.entity.WBAPIElement;
 import com.alejo.economicdataanalyzer.exceptions.IngestException;
+import com.alejo.economicdataanalyzer.exceptions.InvestServiceException;
 import com.alejo.economicdataanalyzer.service.InvestingService;
 
 @Service
@@ -39,15 +40,15 @@ public class InvestingServiceImpl implements InvestingService {
 	@Override
 	public void ingestData(Integer yearFrom, Integer yearTo) throws IngestException {
 		
-		if(validateInput(yearFrom, yearTo)) {
-			logger.error("World Bank API communication error");
-			throw new IngestException();
+		if(validateIngestInput(yearFrom, yearTo)) {
+			logger.error("Parameter Exception");
+			throw new IngestException("yearFrom and yearTo have to be between 2012 and 2019");
 		}
 		//Get a list of All the countries with indicators for Total Population and GDP/PPP
 		List<WBAPIElement> populationResponse = worldBankAPIDAO.getCountriesPopulationAndGdpPpp(yearFrom, yearTo);
 		if(CollectionUtils.isEmpty(populationResponse)) {
 			logger.error("World Bank API communication error");
-			throw new IngestException();
+			throw new IngestException("World Bank API communication error");
 		}
 		
 		//Group the list by Country (loop 1)
@@ -61,7 +62,7 @@ public class InvestingServiceImpl implements InvestingService {
 		
 	}
 
-	private boolean validateInput(Integer yearFrom, Integer yearTo) {
+	private boolean validateIngestInput(Integer yearFrom, Integer yearTo) {
 		return (yearFrom < 2012 || yearFrom >2019) || (yearTo < 2012 || yearTo > 2019) || (yearFrom > yearTo);
 	}
 
@@ -105,7 +106,12 @@ public class InvestingServiceImpl implements InvestingService {
 	}
 
 	@Override
-	public InvestingCountriesResponse listCountriesToInvest(Integer popuLimit, Integer gdpLimit) {
+	public InvestingCountriesResponse listCountriesToInvest(Integer popuLimit, Integer gdpLimit) throws InvestServiceException {
+		
+		if(validateInvestInput(popuLimit, gdpLimit)) {
+			logger.error("Invalid Parameters");
+			throw new InvestServiceException("Invalid Parameters");
+		}
 		
 		InvestingCountriesResponse response = new InvestingCountriesResponse();
 		List<Country> countries = countriesRepository.findAllCountries();
@@ -120,6 +126,10 @@ public class InvestingServiceImpl implements InvestingService {
 		response.setTopGDPPPP(createTopGdpPppResponse(higherPopGrowthCountries, gdpLimit));
 		
 		return response;
+	}
+
+	private boolean validateInvestInput(Integer popuLimit, Integer gdpLimit) {
+		return (gdpLimit > popuLimit);
 	}
 
 	private List<CountryIndicatorResponse> createTopGdpPppResponse(List<Country> countries, Integer gdpCountriesLimit) {
